@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.ir.backend.js.lower.serialization.ir.JsMangler
 import org.jetbrains.kotlin.ir.backend.js.lower.serialization.metadata.KlibMetadataIncrementalSerializer
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
+import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.util.ExpectDeclarationRemover
 import org.jetbrains.kotlin.ir.util.IrDeserializer
 import org.jetbrains.kotlin.ir.util.SymbolTable
@@ -77,6 +78,9 @@ val emptyLoggingContext = object : LoggingContext {
 private val CompilerConfiguration.metadataVersion
     get() = get(CommonConfigurationKeys.METADATA_VERSION) as? KlibMetadataVersion ?: KlibMetadataVersion.INSTANCE
 
+private val CompilerConfiguration.klibMpp: Boolean
+    get() = get(CommonConfigurationKeys.KLIB_MPP) ?: false
+
 class KotlinFileSerializedData(val metadata: ByteArray, val irData: SerializedIrFile)
 
 fun generateKLib(
@@ -121,11 +125,16 @@ fun generateKLib(
 
     val psi2IrContext = runAnalysisAndPreparePsi2Ir(depsDescriptors)
 
-    val moduleFragment = psi2IrContext.generateModuleFragmentWithPlugins(project, files)
+    val expectDescriptorToSymbol = mutableMapOf<DeclarationDescriptor, IrSymbol>()
+
+    val moduleFragment = psi2IrContext.generateModuleFragmentWithPlugins(project, files,
+        deserializer = null, expectDescriptorToSymbol = expectDescriptorToSymbol)
 
     val moduleName = configuration[CommonConfigurationKeys.MODULE_NAME]!!
 
-    moduleFragment.acceptVoid(ExpectDeclarationRemover(psi2IrContext.symbolTable, false))
+    if (!configuration.klibMpp) {
+        moduleFragment.acceptVoid(ExpectDeclarationRemover(psi2IrContext.symbolTable, false))
+    }
 
     serializeModuleIntoKlib(
         moduleName,
@@ -135,6 +144,7 @@ fun generateKLib(
         outputKlibPath,
         allDependencies.getFullList(),
         moduleFragment,
+        expectDescriptorToSymbol,
         icData,
         nopack
     )
@@ -178,6 +188,8 @@ fun loadIr(
         deserializer.deserializeIrModuleHeader(depsDescriptors.getModuleDescriptor(it))!!
     }
 
+    deserializer.initializeExpectActualLinker()
+
     val moduleFragment = psi2IrContext.generateModuleFragmentWithPlugins(project, files, deserializer)
 
     return IrModuleInfo(moduleFragment, deserializedModuleFragments, irBuiltIns, symbolTable, deserializer)
@@ -199,7 +211,8 @@ private fun runAnalysisAndPreparePsi2Ir(depsDescriptors: ModulesStructure): Gene
 fun GeneratorContext.generateModuleFragmentWithPlugins(
     project: Project,
     files: List<KtFile>,
-    deserializer: IrDeserializer? = null
+    deserializer: IrDeserializer? = null,
+    expectDescriptorToSymbol: MutableMap<DeclarationDescriptor, IrSymbol>? = null
 ): IrModuleFragment {
     val irProviders = generateTypicalIrProviderList(moduleDescriptor, irBuiltIns, symbolTable, deserializer)
     val psi2Ir = Psi2IrTranslator(languageVersionSettings, configuration, mangler = JsMangler)
@@ -224,16 +237,17 @@ fun GeneratorContext.generateModuleFragmentWithPlugins(
         psi2Ir.generateModuleFragment(
             this,
             files,
-            irProviders
+            irProviders,
+            expectDescriptorToSymbol
         )
     return moduleFragment
 }
 
-fun GeneratorContext.generateModuleFragment(files: List<KtFile>, deserializer: IrDeserializer? = null): IrModuleFragment {
+fun GeneratorContext.generateModuleFragment(files: List<KtFile>, deserializer: IrDeserializer? = null, expectDescriptorToSymbol: MutableMap<DeclarationDescriptor, IrSymbol>? = null): IrModuleFragment {
     val irProviders = generateTypicalIrProviderList(moduleDescriptor, irBuiltIns, symbolTable, deserializer)
     return Psi2IrTranslator(
         languageVersionSettings, configuration, mangler = JsMangler
-    ).generateModuleFragment(this, files, irProviders)
+    ).generateModuleFragment(this, files, irProviders, expectDescriptorToSymbol)
 }
 
 
@@ -340,6 +354,7 @@ fun serializeModuleIntoKlib(
     klibPath: String,
     dependencies: List<KotlinLibrary>,
     moduleFragment: IrModuleFragment,
+    expectDescriptorToSymbol: MutableMap<DeclarationDescriptor, IrSymbol>,
     cleanFiles: List<KotlinFileSerializedData>,
     nopack: Boolean
 ) {
@@ -347,7 +362,7 @@ fun serializeModuleIntoKlib(
 
     val descriptorTable = DescriptorTable.createDefault()
     val serializedIr =
-        JsIrModuleSerializer(emptyLoggingContext, moduleFragment.irBuiltins, descriptorTable).serializedIrModule(moduleFragment)
+        JsIrModuleSerializer(emptyLoggingContext, moduleFragment.irBuiltins, descriptorTable, skipExpects = !configuration.klibMpp, expectDescriptorToSymbol = expectDescriptorToSymbol).serializedIrModule(moduleFragment)
 
     val moduleDescriptor = moduleFragment.descriptor
 
@@ -357,7 +372,10 @@ fun serializeModuleIntoKlib(
     val metadataSerializer = KlibMetadataIncrementalSerializer(
         languageVersionSettings,
         metadataVersion,
-        descriptorTable)
+        moduleDescriptor,
+        descriptorTable,
+        skipExpects = !configuration.klibMpp
+    )
 
     fun serializeScope(fqName: FqName, memberScope: Collection<DeclarationDescriptor>): ByteArray {
         return metadataSerializer.serializePackageFragment(
