@@ -849,6 +849,7 @@ object Aggregates : TemplateGroupBase() {
         specialFor(ArraysOfUnsigned) { inlineOnly() }
 
         doc { "Accumulates value starting with the first ${f.element} and applying [operation] from left to right to current accumulator value and each ${f.element}. Returns null if the ${f.collection} is empty." }
+        sample("samples.collections.Collections.Aggregates.reduceOrNull")
         returns("T?")
         body {
             """
@@ -872,6 +873,7 @@ object Aggregates : TemplateGroupBase() {
         inline()
 
         doc { "Accumulates value starting with the first ${f.element} and applying [operation] from left to right to current accumulator value and each ${f.element}. Returns null if the ${f.collection} is empty." }
+        sample("samples.collections.Collections.Aggregates.reduceOrNull")
         typeParam("S")
         typeParam("T : S")
         returns("S?")
@@ -908,6 +910,7 @@ object Aggregates : TemplateGroupBase() {
         specialFor(ArraysOfUnsigned) { inlineOnly() }
 
         doc { "Accumulates value starting with last ${f.element} and applying [operation] from right to left to each ${f.element} and current accumulator value." }
+        sample("samples.collections.Collections.Aggregates.reduceRightOrNull")
         returns("T")
         body {
             """
@@ -929,6 +932,7 @@ object Aggregates : TemplateGroupBase() {
     } builder {
         inline()
         doc { "Accumulates value starting with last ${f.element} and applying [operation] from right to left to each ${f.element} and current accumulator value." }
+        sample("samples.collections.Collections.Aggregates.reduceRightOrNull")
         typeParam("S")
         typeParam("T : S")
         returns("S")

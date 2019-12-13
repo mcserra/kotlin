@@ -1197,6 +1197,8 @@ public inline fun CharSequence.reduceIndexed(operation: (index: Int, acc: Char, 
 
 /**
  * Accumulates value starting with the first character and applying [operation] from left to right to current accumulator value and each character. Returns null if the char sequence is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
@@ -1212,6 +1214,8 @@ public inline fun CharSequence.reduceOrNull(operation: (acc: Char, Char) -> Char
 
 /**
  * Accumulates value starting with last character and applying [operation] from right to left to each character and current accumulator value.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 public inline fun CharSequence.reduceRight(operation: (Char, acc: Char) -> Char): Char {
     var index = lastIndex
