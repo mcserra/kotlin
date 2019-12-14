@@ -45,6 +45,7 @@ val fullRuntimeSources by task<Sync> {
         "core/builtins/src/kotlin/",
         "libraries/stdlib/common/src/",
         "libraries/stdlib/src/kotlin/",
+        "libraries/stdlib/jvm/src/kotlin/reflect",
         "libraries/stdlib/unsigned/",
         "libraries/stdlib/js/src/",
         "libraries/stdlib/js/runtime/",
