@@ -372,7 +372,6 @@ fun serializeModuleIntoKlib(
     val metadataSerializer = KlibMetadataIncrementalSerializer(
         languageVersionSettings,
         metadataVersion,
-        moduleDescriptor,
         descriptorTable,
         skipExpects = !configuration.klibMpp
     )
