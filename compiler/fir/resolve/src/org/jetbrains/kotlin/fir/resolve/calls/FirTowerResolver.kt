@@ -9,8 +9,7 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.isInner
 import org.jetbrains.kotlin.fir.resolve.BodyResolveComponents
-import org.jetbrains.kotlin.fir.resolve.calls.TowerDataKind.EMPTY
-import org.jetbrains.kotlin.fir.resolve.calls.TowerDataKind.TOWER_LEVEL
+import org.jetbrains.kotlin.fir.resolve.calls.TowerDataKind.*
 import org.jetbrains.kotlin.fir.resolve.transformers.ReturnTypeCalculator
 import org.jetbrains.kotlin.fir.scopes.FirScope
 import org.jetbrains.kotlin.fir.scopes.ProcessorAction.NONE
@@ -18,6 +17,7 @@ import org.jetbrains.kotlin.fir.scopes.impl.FirLocalScope
 
 enum class TowerDataKind {
     EMPTY,
+    ONLY_IMPLICIT_RECEIVER,
     TOWER_LEVEL
 }
 
@@ -50,6 +50,20 @@ class FirTowerResolver(
             group++
         )
 
+        // class Foo {
+        //     fun foo(block: Foo.() -> Unit) {
+        //         block()
+        //     }
+        // }
+        // invokeExtension on local variable
+        towerDataConsumer.consume(
+            ONLY_IMPLICIT_RECEIVER,
+            // TODO: which scope should be here? Should we use one of nonEmptyLocalScopes here (below)?
+            MemberScopeTowerLevel(session, components, implicitReceiverValue, scopeSession = components.scopeSession),
+            group++
+        )
+        //TowerData.OnlyImplicitReceiver(implicitReceiver).process()?.let { return it }
+
         // Same receiver is dispatch & extension
 //        class Foo {
 //            fun Foo.bar() {}
@@ -61,14 +75,14 @@ class FirTowerResolver(
             group++
         )
 
-        // Local scope extensions via implicit receiver
-        // class Foo {
-        //     fun test() {
-        //         fun Foo.bar() {}
-        //         bar()
-        //     }
-        // }
         for (scope in nonEmptyLocalScopes) {
+            // Local scope extensions via implicit receiver
+            // class Foo {
+            //     fun test() {
+            //         fun Foo.bar() {}
+            //         bar()
+            //     }
+            // }
             towerDataConsumer.consume(
                 TOWER_LEVEL,
                 ScopeTowerLevel(session, components, scope, implicitExtensionReceiver = implicitReceiverValue),

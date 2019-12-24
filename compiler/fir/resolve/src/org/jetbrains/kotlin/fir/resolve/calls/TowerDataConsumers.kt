@@ -183,6 +183,8 @@ class ExplicitReceiverTowerDataConsumer<T : AbstractFirBasedSymbol<*>>(
                     explicitReceiver = null,
                     processor = EmptyKindTowerProcessor(group)
                 )
+            TowerDataKind.ONLY_IMPLICIT_RECEIVER ->
+                return ProcessorAction.NEXT
             TowerDataKind.TOWER_LEVEL -> {
                 if (token == TowerScopeLevel.Token.Objects) return ProcessorAction.NEXT
                 towerScopeLevel.processElementsByName(
