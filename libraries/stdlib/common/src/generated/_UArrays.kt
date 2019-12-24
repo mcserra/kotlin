@@ -5696,8 +5696,6 @@ public inline fun UShortArray.reduceOrNull(operation: (acc: UShort, UShort) -> U
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value.
- * 
- * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalUnsignedTypes
@@ -5714,8 +5712,6 @@ public inline fun UIntArray.reduceRight(operation: (UInt, acc: UInt) -> UInt): U
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value.
- * 
- * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalUnsignedTypes
@@ -5732,8 +5728,6 @@ public inline fun ULongArray.reduceRight(operation: (ULong, acc: ULong) -> ULong
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value.
- * 
- * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalUnsignedTypes
@@ -5750,8 +5744,6 @@ public inline fun UByteArray.reduceRight(operation: (UByte, acc: UByte) -> UByte
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value.
- * 
- * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalUnsignedTypes
@@ -5848,6 +5840,8 @@ public inline fun UShortArray.reduceRightIndexed(operation: (index: Int, UShort,
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value. Returns null if the array is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
@@ -5865,6 +5859,8 @@ public inline fun UIntArray.reduceRightOrNull(operation: (UInt, acc: UInt) -> UI
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value. Returns null if the array is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
@@ -5882,6 +5878,8 @@ public inline fun ULongArray.reduceRightOrNull(operation: (ULong, acc: ULong) ->
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value. Returns null if the array is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
@@ -5899,6 +5897,8 @@ public inline fun UByteArray.reduceRightOrNull(operation: (UByte, acc: UByte) ->
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value. Returns null if the array is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi

@@ -1885,8 +1885,6 @@ public inline fun <S, T : S> Iterable<T>.reduceOrNull(operation: (acc: S, T) -> 
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value.
- * 
- * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 public inline fun <S, T : S> List<T>.reduceRight(operation: (T, acc: S) -> S): S {
     val iterator = listIterator(size)
@@ -1919,6 +1917,8 @@ public inline fun <S, T : S> List<T>.reduceRightIndexed(operation: (index: Int, 
 
 /**
  * Accumulates value starting with last element and applying [operation] from right to left to each element and current accumulator value. Returns null if the list is empty.
+ * 
+ * @sample samples.collections.Collections.Aggregates.reduceRightOrNull
  */
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
